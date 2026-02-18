@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MamaGuard — Maternal Health Assistant</title>
+    <meta name="description"
+        content="AI-powered maternal pregnancy health assistant with risk prediction, hospital finder, and symptom tracking.">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+    <!-- ════════════════ AUTH SCREEN ════════════════ -->
+    <div id="auth-screen" class="auth-wrapper">
+        <!-- LOGIN -->
+        <div id="login-form" class="auth-card">
+            <h1>🤰 MamaGuard</h1>
+            <p class="subtitle">Your Pregnancy Health Companion</p>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary mt-12" onclick="doLogin()">Sign In</button>
+            <p class="auth-toggle">Don't have an account? <a onclick="showRegister()">Sign Up</a></p>
+            <div id="login-error" class="hidden"
+                style="color:var(--coral);text-align:center;margin-top:12px;font-size:0.88rem;"></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="register-form" class="auth-card hidden">
+            <h1>🤰 MamaGuard</h1>
+            <p class="subtitle">Create Your Account</p>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="reg-name" placeholder="Jane Doe">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="reg-email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="reg-password" placeholder="Min 6 characters">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Last Menstrual Period</label>
+                    <input type="date" id="reg-lmp">
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" id="reg-due">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Emergency Contact</label>
+                <input type="text" id="reg-emergency" placeholder="Name — Phone Number">
+            </div>
+            <button class="btn btn-primary mt-12" onclick="doRegister()">Create Account</button>
+            <p class="auth-toggle">Already have an account? <a onclick="showLogin()">Sign In</a></p>
+            <div id="reg-error" class="hidden"
+                style="color:var(--coral);text-align:center;margin-top:12px;font-size:0.88rem;"></div>
+        </div>
+    </div>
+
+    <!-- ════════════════ MAIN APP ════════════════ -->
+    <div id="app" class="app-container">
+
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="brand"><span>🤰</span> MamaGuard</div>
+            <div class="nav-user">
+                <span class="week-badge" id="week-badge">📅 Week —</span>
+                <span class="user-name" id="user-name"></span>
+                <button class="logout-btn" onclick="doLogout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- TAB NAV -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-tab="home" onclick="switchTab('home')">🏠 Home</button>
+            <button class="tab-btn" data-tab="chat" onclick="switchTab('chat')">💬 MedChat</button>
+            <button class="tab-btn" data-tab="risk" onclick="switchTab('risk')">🩺 Risk Check</button>
+            <button class="tab-btn" data-tab="hospital" onclick="switchTab('hospital')">🏥 Hospital</button>
+            <button class="tab-btn" data-tab="symptoms" onclick="switchTab('symptoms')">📋 Symptoms</button>
+        </div>
+
+        <!-- ═══════ HOME PAGE ═══════ -->
+        <section id="page-home" class="page-section active">
+            <!-- Progress Bar -->
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span id="progress-label-text">Loading...</span>
+                    <span id="progress-percent"></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+                <div class="trimester-markers">
+                    <span>Week 1</span>
+                    <span>Trimester 2 →</span>
+                    <span>Trimester 3 →</span>
+                    <span>Week 42</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="switchTab('risk')">
+                    <span class="q-icon">🩺</span>
+                    <span class="q-label">Check Risk</span>
+                </button>
+                <button class="quick-btn" onclick="switchTab('hospital')">
+                    <span class="q-icon">🏥</span>
+                    <span class="q-label">Find Hospital</span>
+                </button>
+                <button class="quick-btn" onclick="switchTab('symptoms')">
+                    <span class="q-icon">📋</span>
+                    <span class="q-label">Log Symptoms</span>
+                </button>
+            </div>
+
+            <!-- Weekly Article -->
+            <div class="card" id="article-card">
+                <div class="card-header">
+                    <div class="icon icon-pink">📖</div>
+                    <h3 id="article-title">This Week's Guide</h3>
+                    <span class="tag tag-t1" id="article-trimester"></span>
+                </div>
+                <div class="article-grid" id="article-content">
+                    <div class="loading-overlay">
+                        <div class="spinner"></div> Loading article...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ MEDCHAT PAGE ═══════ -->
+        <section id="page-chat" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-purple">💬</div>
+                    <h3>MedChat — Pregnancy Health AI</h3>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-msg bot">Hi! 👋 I'm your pregnancy health assistant. Ask me anything about your
+                            pregnancy, nutrition, symptoms, or exercises.</div>
+                    </div>
+                    <div class="chat-input-row">
+                        <input type="text" id="chat-input" placeholder="Ask a question..."
+                            onkeydown="if(event.key==='Enter')sendChat()">
+                        <button onclick="sendChat()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ RISK CHECK PAGE ═══════ -->
+        <section id="page-risk" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-orange">🩺</div>
+                    <h3>Risk Prediction</h3>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Systolic BP (mmHg)</label>
+                        <input type="number" id="risk-sys" value="120" min="70" max="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Diastolic BP (mmHg)</label>
+                        <input type="number" id="risk-dia" value="80" min="40" max="130">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Heart Rate (bpm)</label>
+                        <input type="number" id="risk-hr" value="75" min="40" max="150">
+                    </div>
+                    <div class="form-group">
+                        <label>Glucose (mg/dL)</label>
+                        <input type="number" id="risk-glu" value="90" min="50" max="300">
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-12" onclick="assessRisk()" id="risk-btn">Assess Risk</button>
+            </div>
+
+            <!-- Result -->
+            <div id="risk-result" class="hidden"></div>
+
+            <!-- History -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-blue">📊</div>
+                    <h3>Assessment History</h3>
+                </div>
+                <div id="risk-history" class="history-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>No assessments yet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════ HOSPITAL PAGE ═══════ -->
+        <section id="page-hospital" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-green">🏥</div>
+                    <h3>Nearest Hospital & Safe Route</h3>
+                </div>
+                <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:12px;">
+                    Click the button to use your location, or click on the map to set a custom starting point.
+                </p>
+                <button class="btn btn-primary mb-16" onclick="findHospital()" id="find-btn">📍 Use My Location</button>
+                <div id="hospital-map"></div>
+            </div>
+            <div id="hospital-results" class="hospital-results"></div>
+        </section>
+
+        <!-- ═══════ SYMPTOMS PAGE ═══════ -->
+        <section id="page-symptoms" class="page-section">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-pink">📋</div>
+                    <h3>Log a Symptom</h3>
+                </div>
+                <div class="form-group">
+                    <label>Symptom</label>
+                    <select id="sym-name">
+                        <option>Headache</option>
+                        <option>Nausea</option>
+                        <option>Swelling</option>
+                        <option>Back Pain</option>
+                        <option>Contractions</option>
+                        <option>Dizziness</option>
+                        <option>Fatigue</option>
+                        <option>Bleeding</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Severity</label>
+                    <select id="sym-sev">
+                        <option value="mild">Mild</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="severe">Severe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="sym-notes" rows="2"
+                        placeholder="Describe when it started, how it feels..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="logSymptom()">Log Symptom</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon icon-blue">🕐</div>
+                    <h3>Symptom History</h3>
+                </div>
+                <div id="sym-history" class="history-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No symptoms logged yet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ════════════════ EMERGENCY BUTTON ════════════════ -->
+    <button class="emergency-btn hidden" id="emergency-btn" onclick="showEmergency()" title="Emergency">🆘</button>
+
+    <!-- Emergency Modal -->
+    <div class="emergency-modal" id="emergency-modal">
+        <div class="emergency-content">
+            <h2>🚨 Emergency</h2>
+            <p>If you are experiencing a medical emergency, call immediately:</p>
+            <div class="contact-info" id="emergency-contact-display">📞 102 (Nepal Ambulance)</div>
+            <p id="emergency-personal" style="margin-top:12px;font-size:0.9rem;color:var(--text-secondary);"></p>
+            <button class="btn btn-primary mt-20" onclick="closeEmergency()">Close</button>
+        </div>
+    </div>
+
+    <!-- ════════════════ JAVASCRIPT ════════════════ -->
+    <script>
+        // ── State ────────────────────────────────────────
+        let TOKEN = localStorage.getItem('mg_token') || null;
+        let USER = JSON.parse(localStorage.getItem('mg_user') || 'null');
+        let MAP = null;
+        let routeLayer = null;
+
+        // ── Init ─────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            if (TOKEN && USER) {
+                showApp();
+            }
+        });
+
+        // ── Auth ─────────────────────────────────────────
+        function showLogin() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        async function doLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+            errEl.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.textContent = data.detail || 'Login failed'; errEl.classList.remove('hidden'); return; }
+                TOKEN = data.token;
+                USER = data.user;
+                localStorage.setItem('mg_token', TOKEN);
+                localStorage.setItem('mg_user', JSON.stringify(USER));
+                showApp();
+            } catch (e) {
+                errEl.textContent = 'Connection error'; errEl.classList.remove('hidden');
+            }
+        }
+
+        async function doRegister() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const lmp = document.getElementById('reg-lmp').value || null;
+            const due = document.getElementById('reg-due').value || null;
+            const emergency = document.getElementById('reg-emergency').value || null;
+            const errEl = document.getElementById('reg-error');
+            errEl.classList.add('hidden');
+
+            if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; errEl.classList.remove('hidden'); return; }
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, lmp_date: lmp, due_date: due, emergency_contact: emergency })
+                });
+                const data = await res.json();
+                if (!res.ok) { errEl.textContent = data.detail || 'Registration failed'; errEl.classList.remove('hidden'); return; }
+                TOKEN = data.token;
+                USER = data.user;
+                localStorage.setItem('mg_token', TOKEN);
+                localStorage.setItem('mg_user', JSON.stringify(USER));
+                showApp();
+            } catch (e) {
+                errEl.textContent = 'Connection error'; errEl.classList.remove('hidden');
+            }
+        }
+
+        function doLogout() {
+            TOKEN = null; USER = null;
+            localStorage.removeItem('mg_token');
+            localStorage.removeItem('mg_user');
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('emergency-btn').classList.add('hidden');
+        }
+
+        // ── Show App ─────────────────────────────────────
+        function showApp() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            document.getElementById('emergency-btn').classList.remove('hidden');
+
+            // User info
+            document.getElementById('user-name').textContent = USER.name;
+            const week = USER.pregnancy_week;
+            if (week) {
+                document.getElementById('week-badge').textContent = `📅 Week ${week}`;
+                updateProgress(week);
+                loadArticle(week);
+            } else {
+                document.getElementById('week-badge').textContent = '📅 Week —';
+                document.getElementById('progress-label-text').textContent = 'Set your LMP date in profile to track progress';
+                loadArticle(20); // default
+            }
+
+            // Emergency contact
+            if (USER.emergency_contact) {
+                document.getElementById('emergency-personal').textContent = `Your contact: ${USER.emergency_contact}`;
+            }
+
+            loadRiskHistory();
+            loadSymptomHistory();
+        }
+
+        // ── Tab Switching ────────────────────────────────
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${tab}`).classList.add('active');
+
+            if (tab === 'hospital' && !MAP) { initMap(); }
+        }
+
+        // ── Progress Bar ─────────────────────────────────
+        function updateProgress(week) {
+            const pct = Math.min(100, Math.round((week / 42) * 100));
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-percent').textContent = pct + '%';
+
+            let trimester = week <= 13 ? '1st' : (week <= 27 ? '2nd' : '3rd');
+            document.getElementById('progress-label-text').textContent = `Week ${week} of 42 — ${trimester} Trimester`;
+        }
+
+        // ── Articles ─────────────────────────────────────
+        async function loadArticle(week) {
+            try {
+                const res = await fetch(`/api/articles?week=${week}`);
+                const art = await res.json();
+                const trimName = art.trimester === 1 ? '1st Trimester' : (art.trimester === 2 ? '2nd Trimester' : '3rd Trimester');
+                const tagClass = art.trimester === 1 ? 'tag-t1' : (art.trimester === 2 ? 'tag-t2' : 'tag-t3');
+
+                document.getElementById('article-title').textContent = `Week ${art.week} Guide`;
+                const tagEl = document.getElementById('article-trimester');
+                tagEl.textContent = trimName;
+                tagEl.className = 'tag ' + tagClass;
+
+                document.getElementById('article-content').innerHTML = `
+            <div class="article-item"><h4>👶 Baby Development</h4><p>${art.baby}</p></div>
+            <div class="article-item"><h4>🤱 Mom's Body</h4><p>${art.mom}</p></div>
+            <div class="article-item"><h4>🥗 Nutrition Tips</h4><p>${art.nutrition}</p></div>
+            <div class="article-item"><h4>⚠️ Warning Signs</h4><p>${art.warning_signs}</p></div>
+        `;
+            } catch (e) {
+                document.getElementById('article-content').innerHTML = '<p style="color:var(--text-muted)">Could not load article.</p>';
+            }
+        }
+
+        // ── MedChat ──────────────────────────────────────
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const q = input.value.trim();
+            if (!q) return;
+            input.value = '';
+
+            const msgs = document.getElementById('chat-messages');
+            msgs.innerHTML += `<div class="chat-msg user">${escapeHtml(q)}</div>`;
+            msgs.innerHTML += `<div class="chat-msg bot" id="typing-indicator"><div class="spinner"></div></div>`;
+            msgs.scrollTop = msgs.scrollHeight;
+
+            try {
+                const res = await fetch('/api/chat/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: TOKEN, question: q })
+                });
+                const data = await res.json();
+                document.getElementById('typing-indicator')?.remove();
+
+                if (res.ok) {
+                    msgs.innerHTML += `<div class="chat-msg bot">${escapeHtml(data.answer)}</div>`;
+                } else {
+                    msgs.innerHTML += `<div class="chat-msg bot" style="color:var(--coral)">Error: ${data.detail || 'Something went wrong'}</div>`;
+                }
+            } catch (e) {
+                document.getElementById('typing-indicator')?.remove();
+                msgs.innerHTML += `<div class="chat-msg bot" style="color:var(--coral)">Connection error. Please try again.</div>`;
+            }
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        // ── Risk Assessment ──────────────────────────────
+        async function assessRisk() {
+            const btn = document.getElementById('risk-btn');
+            btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Assessing...';
+
+            const body = {
+                token: TOKEN,
+                bp_systolic: parseInt(document.getElementById('risk-sys').value),
+                bp_diastolic: parseInt(document.getElementById('risk-dia').value),
+                heart_rate: parseInt(document.getElementById('risk-hr').value),
+                glucose: parseInt(document.getElementById('risk-glu').value)
+            };
+
+            try {
+                const res = await fetch('/api/risk/assess', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                btn.disabled = false; btn.textContent = 'Assess Risk';
+
+                if (res.ok) {
+                    const level = data.risk_level.toLowerCase();
+                    const warnings = data.warnings.length > 0
+                        ? data.warnings.map(w => `<p>⚠️ ${escapeHtml(w)}</p>`).join('')
+                        : '<p>✅ All vitals within normal range.</p>';
+
+                    const resultEl = document.getElementById('risk-result');
+                    resultEl.className = `risk-result ${level}`;
+                    resultEl.innerHTML = `<div class="level">${data.risk_level} Risk</div><div class="warnings">${warnings}</div>`;
+                    resultEl.classList.remove('hidden');
+
+                    loadRiskHistory();
+                }
+            } catch (e) {
+                btn.disabled = false; btn.textContent = 'Assess Risk';
+            }
+        }
+
+        async function loadRiskHistory() {
+            try {
+                const res = await fetch(`/api/risk/history?token=${TOKEN}`);
+                const rows = await res.json();
+                const el = document.getElementById('risk-history');
+
+                if (rows.length === 0) {
+                    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><p>No assessments yet</p></div>';
+                    return;
+                }
+                el.innerHTML = rows.map(r => {
+                    const lvl = r.risk_level.toLowerCase();
+                    const dateStr = new Date(r.assessed_at).toLocaleDateString();
+                    return `<div class="history-item">
+                <div class="history-dot dot-${lvl}"></div>
+                <div class="history-info">
+                    <div class="h-title">${r.risk_level} Risk — BP ${r.bp_systolic}/${r.bp_diastolic}</div>
+                    <div class="h-sub">HR ${r.heart_rate} bpm · Glucose ${r.glucose} mg/dL</div>
+                </div>
+                <div class="history-time">${dateStr}</div>
+            </div>`;
+                }).join('');
+            } catch (e) { }
+        }
+
+        // ── Hospital Finder ──────────────────────────────
+        function initMap() {
+            MAP = L.map('hospital-map').setView([27.7172, 85.3240], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(MAP);
+
+            MAP.on('click', function (e) {
+                findHospitalAt(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function findHospital() {
+            const btn = document.getElementById('find-btn');
+            btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Locating...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        btn.disabled = false; btn.textContent = '📍 Use My Location';
+                        findHospitalAt(pos.coords.latitude, pos.coords.longitude);
+                    },
+                    err => {
+                        btn.disabled = false; btn.textContent = '📍 Use My Location';
+                        alert('Could not get location. Click on the map instead.');
+                    }
+                );
+            } else {
+                btn.disabled = false; btn.textContent = '📍 Use My Location';
+                alert('Geolocation not supported. Click on the map instead.');
+            }
+        }
+
+        async function findHospitalAt(lat, lon) {
+            if (!MAP) initMap();
+            MAP.setView([lat, lon], 14);
+
+            // Clear old layers
+            if (routeLayer) { MAP.removeLayer(routeLayer); }
+            routeLayer = L.layerGroup().addTo(MAP);
+
+            // User marker
+            L.marker([lat, lon], {
+                icon: L.divIcon({ html: '<div style="font-size:28px">📍</div>', iconSize: [30, 30], className: '' })
+            }).addTo(routeLayer);
+
+            const week = USER.pregnancy_week || 20;
+
+            try {
+                const res = await fetch(`/api/route/find?lat=${lat}&lon=${lon}&week=${week}&mode=routine`);
+                const hospitals = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('hospital-results').innerHTML = `<div class="card" style="text-align:center;color:var(--coral)">${hospitals.detail || 'No hospitals found'}</div>`;
+                    return;
+                }
+
+                const resultsEl = document.getElementById('hospital-results');
+                resultsEl.innerHTML = '';
+
+                hospitals.forEach((h, idx) => {
+                    // Draw route for first hospital
+                    if (idx === 0 && h.route_segments) {
+                        h.route_segments.forEach(seg => {
+                            const safety = seg.properties ? seg.properties.safety : (seg.safety || 1);
+                            let color = '#27ae60';
+                            if (safety > 1.5) color = '#c0392b';
+                            else if (safety > 1.15) color = '#e67e22';
+                            else if (safety > 1.0) color = '#f1c40f';
+
+                            if (seg.geometry && seg.geometry.coordinates) {
+                                const latlngs = seg.geometry.coordinates.map(c => [c[1], c[0]]);
+                                L.polyline(latlngs, { color, weight: 5, opacity: 0.8 }).addTo(routeLayer);
+                            }
+                        });
+                    }
+
+                    // Hospital marker
+                    L.marker([h.lat, h.lon], {
+                        icon: L.divIcon({ html: '<div style="font-size:28px">🏥</div>', iconSize: [30, 30], className: '' })
+                    }).addTo(routeLayer).bindPopup(`<b>${h.name}</b><br>${h.distance_km} km`);
+
+                    // Result card
+                    resultsEl.innerHTML += `
+                <div class="hospital-card">
+                    <div class="h-rank">${idx + 1}</div>
+                    <div class="h-info">
+                        <div class="h-name">${escapeHtml(h.name)}</div>
+                        <div class="h-meta">📏 ${h.distance_km} km · ⏱️ ${h.time_minutes} min · ⭐ Score ${h.score}</div>
+                    </div>
+                </div>`;
+                });
+
+                // Fit map to all markers
+                const bounds = L.latLngBounds([[lat, lon]].concat(hospitals.map(h => [h.lat, h.lon])));
+                MAP.fitBounds(bounds, { padding: [40, 40] });
+
+            } catch (e) {
+                document.getElementById('hospital-results').innerHTML = '<div class="card" style="text-align:center;color:var(--coral)">Could not reach hospital finder service.</div>';
+            }
+        }
+
+        // ── Symptom Tracker ──────────────────────────────
+        async function logSymptom() {
+            const body = {
+                token: TOKEN,
+                symptom: document.getElementById('sym-name').value,
+                severity: document.getElementById('sym-sev').value,
+                notes: document.getElementById('sym-notes').value
+            };
+
+            try {
+                const res = await fetch('/api/symptoms/log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    document.getElementById('sym-notes').value = '';
+                    loadSymptomHistory();
+                }
+            } catch (e) { }
+        }
+
+        async function loadSymptomHistory() {
+            try {
+                const res = await fetch(`/api/symptoms/history?token=${TOKEN}`);
+                const rows = await res.json();
+                const el = document.getElementById('sym-history');
+
+                if (rows.length === 0) {
+                    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No symptoms logged yet</p></div>';
+                    return;
+                }
+
+                el.innerHTML = rows.map(r => {
+                    const dateStr = new Date(r.logged_at).toLocaleDateString();
+                    return `<div class="history-item">
+                <div class="history-dot dot-${r.severity}"></div>
+                <div class="history-info">
+                    <div class="h-title">${escapeHtml(r.symptom)} — ${r.severity}</div>
+                    <div class="h-sub">${escapeHtml(r.notes || 'No notes')}</div>
+                </div>
+                <div class="history-time">${dateStr}</div>
+            </div>`;
+                }).join('');
+            } catch (e) { }
+        }
+
+        // ── Emergency ────────────────────────────────────
+        function showEmergency() { document.getElementById('emergency-modal').classList.add('show'); }
+        function closeEmergency() { document.getElementById('emergency-modal').classList.remove('show'); }
+
+        // ── Utility ──────────────────────────────────────
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>

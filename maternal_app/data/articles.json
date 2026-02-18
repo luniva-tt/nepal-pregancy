@@ -1,0 +1,90 @@
+[
+    {
+        "week": 1,
+        "trimester": 1,
+        "baby": "Conception is happening! The fertilized egg (zygote) begins its journey to the uterus.",
+        "mom": "You may not notice any changes yet. Your body is preparing the uterine lining for implantation.",
+        "nutrition": "Start taking folic acid (400mcg daily). Eat leafy greens, lentils, and fortified cereals.",
+        "warning_signs": "No specific warning signs at this stage. Focus on healthy habits."
+    },
+    {
+        "week": 4,
+        "trimester": 1,
+        "baby": "The embryo is the size of a poppy seed. The neural tube (future brain and spine) is forming.",
+        "mom": "You might notice a missed period, mild cramping, or breast tenderness. A pregnancy test may show positive.",
+        "nutrition": "Increase iron-rich foods (spinach, beans). Stay hydrated with 8-10 glasses of water.",
+        "warning_signs": "Heavy bleeding or severe cramping — contact your doctor immediately."
+    },
+    {
+        "week": 8,
+        "trimester": 1,
+        "baby": "Baby is about the size of a raspberry. Tiny fingers and toes are forming. The heart is beating!",
+        "mom": "Morning sickness may peak. Fatigue and frequent urination are common. Your first prenatal visit is due.",
+        "nutrition": "Eat small, frequent meals to manage nausea. Ginger tea can help. Avoid raw fish and unpasteurized dairy.",
+        "warning_signs": "Severe vomiting preventing any food/liquid intake. Spotting with pain."
+    },
+    {
+        "week": 12,
+        "trimester": 1,
+        "baby": "Baby is the size of a lime (~5cm). Organs are fully formed and beginning to function. Reflexes are developing.",
+        "mom": "Nausea often starts to ease. You may notice a small baby bump. Energy levels may improve.",
+        "nutrition": "Calcium is crucial now — include milk, yogurt, or fortified alternatives. Aim for 1000mg daily.",
+        "warning_signs": "Persistent headaches, blurred vision, or sudden swelling in hands/face."
+    },
+    {
+        "week": 16,
+        "trimester": 2,
+        "baby": "Baby is about the size of an avocado. They can make facial expressions and may start sucking their thumb!",
+        "mom": "Welcome to the 'golden trimester'! Many women feel more energetic. You may feel the first flutters of movement.",
+        "nutrition": "Omega-3 fatty acids support brain development — eat fish (low mercury), walnuts, or take supplements.",
+        "warning_signs": "Any fluid leaking from the vagina. Persistent lower back pain."
+    },
+    {
+        "week": 20,
+        "trimester": 2,
+        "baby": "Halfway there! Baby is the size of a banana (~25cm). You'll likely have your anatomy scan this week.",
+        "mom": "You can clearly feel baby movements now. Your uterus is at navel level. Skin changes (linea nigra) may appear.",
+        "nutrition": "Increase protein intake (70g/day) — lean meat, eggs, tofu, legumes. Vitamin D is important too.",
+        "warning_signs": "Reduced fetal movement after feeling regular kicks. Painful urination (possible UTI)."
+    },
+    {
+        "week": 24,
+        "trimester": 2,
+        "baby": "Baby weighs about 600g and is developing a sleep-wake cycle. Lungs are developing surfactant.",
+        "mom": "Braxton Hicks contractions may start. Glucose screening test is usually done around now.",
+        "nutrition": "Monitor sugar intake. Eat complex carbohydrates (whole grains, sweet potatoes) for sustained energy.",
+        "warning_signs": "Signs of preterm labor: regular contractions, pelvic pressure, watery vaginal discharge."
+    },
+    {
+        "week": 28,
+        "trimester": 3,
+        "baby": "Third trimester begins! Baby can open their eyes and weighs about 1kg. Brain is developing rapidly.",
+        "mom": "Shortness of breath and heartburn increase as baby grows. Sleep may become uncomfortable.",
+        "nutrition": "Iron needs increase significantly — eat red meat, beans, and pair with vitamin C foods for absorption.",
+        "warning_signs": "Severe headache, vision changes, upper abdominal pain — could indicate pre-eclampsia. Seek care immediately."
+    },
+    {
+        "week": 32,
+        "trimester": 3,
+        "baby": "Baby is about 42cm and weighs ~1.8kg. They're practicing breathing movements and can hear your voice clearly.",
+        "mom": "Frequent bathroom trips return. Swelling in ankles is common. You should start counting kicks daily.",
+        "nutrition": "Magnesium helps with leg cramps — eat nuts, seeds, dark chocolate. Continue high iron and calcium.",
+        "warning_signs": "Fewer than 10 kicks in 2 hours. Sudden severe swelling. Vaginal bleeding."
+    },
+    {
+        "week": 36,
+        "trimester": 3,
+        "baby": "Baby is almost full-term (~47cm, ~2.7kg). They're moving into head-down position for delivery.",
+        "mom": "You may feel 'lightening' as baby drops lower. Pelvic pressure increases. Nesting instinct may kick in!",
+        "nutrition": "Eat dates (6 per day from week 36) — studies show they may help with cervical ripening. Stay well hydrated.",
+        "warning_signs": "Water breaking (gush or trickle of fluid). Regular contractions every 5 minutes."
+    },
+    {
+        "week": 40,
+        "trimester": 3,
+        "baby": "Full term! Baby weighs about 3.4kg and is 50cm long. They are ready to meet you!",
+        "mom": "Due date week! You may experience the mucus plug release, increased contractions, and lower back pain.",
+        "nutrition": "Eat light, easily digestible meals. Pack hospital snacks (energy bars, juice). Stay hydrated for labor.",
+        "warning_signs": "Contractions 5 minutes apart lasting 1 minute for 1 hour — time to go to the hospital!"
+    }
+]
