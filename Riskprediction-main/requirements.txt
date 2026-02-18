@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+fastapi
+uvicorn
+pydantic
+python-multipart
+joblib
+matplotlib
+seaborn
+sqlalchemy
+passlib[bcrypt]
+python-jose[cryptography]

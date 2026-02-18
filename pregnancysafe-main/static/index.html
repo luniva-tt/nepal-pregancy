@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Safe Route Finder - Nepal</title>
+    <!-- Leaflet Standard -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --secondary: #2c3e50;
+            --accent: #27ae60;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #eee;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+            z-index: 10;
+        }
+
+        /* Floating Top-Right Settings */
+        #settings-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 340px;
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            /* Ensure it's above everything */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            pointer-events: auto;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #777;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #edeff2;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        #search-results {
+            border: 2px solid #edeff2;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #search-results div:hover {
+            background: #f0f4f7 !important;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .btn-search {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-search:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Instruction Pill (Top Left) */
+        #instruction {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 9998;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        /* Results Card (Bottom Left) */
+        #results-card {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            z-index: 9997;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .res-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .res-header h3 {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .hosp-info {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 5px solid var(--accent);
+        }
+
+        .hosp-info h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .info-row {
+            font-size: 13px;
+            margin-bottom: 6px;
+            display: flex;
+            gap: 8px;
+            color: #555;
+        }
+
+        .info-lbl {
+            font-weight: 700;
+            color: #999;
+            width: 90px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: #f0f4f7;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box b {
+            display: block;
+            font-size: 20px;
+            color: var(--secondary);
+        }
+
+        .stat-box small {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            #settings-panel {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                border-radius: 20px 20px 0 0;
+            }
+
+            #results-card {
+                bottom: 340px;
+                width: calc(100% - 40px);
+                left: 20px;
+            }
+
+            #instruction {
+                left: 10px;
+                right: 10px;
+                top: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <div id="instruction">� Search location or click map to set start point</div>
+
+    <div id="settings-panel">
+        <h2><span>🤰</span> Safe Route</h2>
+
+        <div class="form-group">
+            <label>Pregnancy Week</label>
+            <input type="number" id="week" value="20" min="1" max="42">
+        </div>
+
+        <div class="form-group">
+            <label>Routing Mode</label>
+            <select id="mode">
+                <option value="routine">Routine Checkup</option>
+                <option value="high_risk">High-Risk Case</option>
+                <option value="emergency">🚨 Emergency</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Start Location</label>
+            <input type="text" id="location-search" placeholder="Search location or click on map...">
+            <div id="search-results"
+                style="display:none; margin-top:10px; max-height:200px; overflow-y:auto; background:#f5f5f5; border-radius:8px;">
+            </div>
+        </div>
+
+        <input type="hidden" id="lat">
+        <input type="hidden" id="lon">
+
+        <button class="btn-search" id="find-btn" onclick="findRoute()">
+            <div class="spinner" id="btn-spinner"></div>
+            <span id="btn-label">🔍 Find Hospital</span>
+        </button>
+    </div>
+
+    <div id="results-card">
+        <div class="res-header">
+            <h3>✅ Safe Route Found</h3>
+            <button onclick="document.getElementById('results-card').style.display='none'"
+                style="border:none; background:none; cursor:pointer; font-size:24px;">×</button>
+        </div>
+
+        <div id="hosp-list" style="margin-bottom: 15px;"></div>
+
+        <div class="hosp-info" id="active-hosp-info">
+            <h4 id="h-name">Loading...</h4>
+            <div class="info-row" id="h-hours-row"><span class="info-lbl">Open Hours:</span> <span id="h-hours">-</span>
+            </div>
+            <div class="info-row"><span class="info-lbl">Safety Score:</span> <b id="h-score"
+                    style="color:var(--accent)">-</b></div>
+        </div>
+
+        <div id="route-legend" style="margin-top:15px; font-size:10px; display:flex; gap:8px; color:#666;">
+            <span><i style="color:#27ae60">●</i> Smooth</span>
+            <span><i style="color:#f1c40f">●</i> Moderate</span>
+            <span><i style="color:#e67e22">●</i> Rough</span>
+            <span><i style="color:#c0392b">●</i> Avoid</span>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Diagnostic Error Handler
+        window.onerror = function (msg, url, line) {
+            alert("Frontend Error: " + msg + "\nAt: " + line);
+            return false;
+        };
+
+        const map = L.map('map', { zoomControl: true }).setView([27.7172, 85.3240], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OSM contributors'
+        }).addTo(map);
+
+        let startMarker, routeLayer, destMarker;
+        let hospitalMarkers = L.layerGroup().addTo(map);
+
+        // Load all hospitals on startup
+        async function loadAllHospitals() {
+            try {
+                const res = await fetch('/api/hospitals');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                L.geoJSON(data, {
+                    pointToLayer: (feature, latlng) => {
+                        return L.circleMarker(latlng, {
+                            radius: 5,
+                            fillColor: "#3498db",
+                            color: "#fff",
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    },
+                    onEachFeature: (feature, layer) => {
+                        layer.bindPopup(`<b>${feature.properties.name || 'Hospital'}</b>`);
+                    }
+                }).addTo(hospitalMarkers);
+            } catch (e) {
+                console.warn("Could not load hospital markers", e);
+            }
+        }
+        loadAllHospitals();
+
+        // Location Search Functionality
+        const locationInput = document.getElementById('location-search');
+        const searchResults = document.getElementById('search-results');
+        let searchTimeout;
+
+        function withTimeout(promise, ms) {
+            return Promise.race([
+                promise,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), ms))
+            ]);
+        }
+
+        locationInput.addEventListener('input', function (e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchResults.innerHTML = '<div style="padding:10px; color:#888;">⏳ Searching...</div>';
+            searchResults.style.display = 'block';
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await withTimeout(
+                        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=np`),
+                        5000
+                    );
+                    const results = await response.json();
+
+                    if (results.length === 0) {
+                        searchResults.innerHTML = '<div style="padding:10px; color:#999;">No results found - click map to set location</div>';
+                    } else {
+                        searchResults.innerHTML = results.map((result, idx) => `
+                            <div style="padding:10px; cursor:pointer; border-bottom:1px solid #ddd;" 
+                                 onclick="selectLocation('${result.lat}', '${result.lon}', '${result.display_name.split(',')[0]}@${idx}')">
+                                <b style="font-size:13px; color:#333;">${result.display_name.split(',')[0]}</b>
+                                <div style="font-size:11px; color:#888;">${result.display_name.split(',').slice(1, 3).join(',')}</div>
+                            </div>
+                        `).join('');
+                    }
+                    searchResults.style.display = 'block';
+                } catch (error) {
+                    console.error('Search error:', error);
+                    searchResults.innerHTML = '<div style="padding:10px; color:#ff6b6b;">⚠️ Search timeout - click map instead</div>';
+                    searchResults.style.display = 'block';
+                }
+            }, 300);
+        });
+
+        function selectLocation(lat, lon, name) {
+            lat = parseFloat(lat);
+            lon = parseFloat(lon);
+
+            document.getElementById('lat').value = lat;
+            document.getElementById('lon').value = lon;
+            document.getElementById('location-search').value = name.split('@')[0];
+            searchResults.style.display = 'none';
+
+            const instr = document.getElementById('instruction');
+            instr.innerText = "✅ Location set! Now click Find Hospital";
+            instr.style.background = "#27ae60";
+
+            if (startMarker) map.removeLayer(startMarker);
+            startMarker = L.circleMarker([lat, lon], {
+                radius: 12, fillColor: "#3498db", color: "#fff", weight: 3, opacity: 1, fillOpacity: 0.8
+            }).addTo(map).bindPopup("<b>Your Start Location</b>").openPopup();
+
+            map.setView([lat, lon], 14);
+        }
+
+        map.on('click', function (e) {
+            const { lat, lng } = e.latlng;
+            document.getElementById('lat').value = lat;
+            document.getElementById('lon').value = lng;
+
+            const instr = document.getElementById('instruction');
+            instr.innerText = "✅ Location set! Now click Find Hospital";
+            instr.style.background = "#27ae60";
+
+            if (startMarker) map.removeLayer(startMarker);
+            startMarker = L.circleMarker([lat, lng], {
+                radius: 12, fillColor: "#3498db", color: "#fff", weight: 3, opacity: 1, fillOpacity: 0.8
+            }).addTo(map).bindPopup("<b>Your Start Location</b>").openPopup();
+
+            searchResults.style.display = 'none';
+        });
+
+        let allRoutesData = [];
+
+        async function findRoute() {
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
+            const week = document.getElementById('week').value;
+            const mode = document.getElementById('mode').value;
+
+            if (!lat || !lon) {
+                alert("⚠️ Please click on the map first to select your start location.");
+                return;
+            }
+
+            const btn = document.getElementById('find-btn');
+            const spinner = document.getElementById('btn-spinner');
+            const label = document.getElementById('btn-label');
+
+            btn.disabled = true;
+            spinner.style.display = 'block';
+            label.innerText = 'Searching...';
+            document.getElementById('results-card').style.display = 'none';
+
+            if (routeLayer) map.removeLayer(routeLayer);
+            if (destMarker) map.removeLayer(destMarker);
+
+            try {
+                const api_url = `/api/route?lat=${lat}&lon=${lon}&week=${week}&mode=${mode}`;
+
+                // Increase timeout to 120s for nationwide searches
+                const res = await withTimeout(fetch(api_url), 120000);
+                if (!res.ok) {
+                    let errData;
+                    try {
+                        errData = await res.json();
+                    } catch {
+                        throw new Error(`Server error: ${res.status}`);
+                    }
+                    throw new Error(errData.detail || "No route found");
+                }
+
+                allRoutesData = await res.json();
+                displayHospitalsList();
+                selectHospital(0);
+
+            } catch (err) {
+                alert("❌ Search failed: " + err.message);
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                label.innerText = '🔍 Find Hospital';
+            }
+        }
+
+        function displayHospitalsList() {
+            const list = document.getElementById('hosp-list');
+            list.innerHTML = allRoutesData.map((data, idx) => `
+                <div onclick="selectHospital(${idx})" style="padding:10px; border:2px solid #edeff2; border-radius:10px; margin-bottom:8px; cursor:pointer; background:white; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b style="font-size:13px;">${data.destination.name}</b>
+                        <div style="font-size:11px; color:#888;">${(data.distance_meters / 1000).toFixed(1)} km · ${data.time_minutes.toFixed(0)} min</div>
+                    </div>
+                    <div style="text-align:right">
+                        <b style="color:var(--accent)">${data.score}</b>
+                        <div style="font-size:9px; color:#999; text-transform:uppercase">Score</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectHospital(idx) {
+            const data = allRoutesData[idx];
+            const dest = data.destination;
+
+            if (routeLayer) map.removeLayer(routeLayer);
+            if (destMarker) map.removeLayer(destMarker);
+
+            // Draw color-coded segments
+            routeLayer = L.layerGroup().addTo(map);
+            data.route_segments.forEach(seg => {
+                const safety = seg.properties.safety;
+                let color = '#27ae60'; // Smooth
+                if (safety > 1.5) color = '#c0392b'; // Avoid
+                else if (safety > 1.15) color = '#e67e22'; // Rough
+                else if (safety > 1.0) color = '#f1c40f'; // Moderate
+
+                // Manual coordinate flip for Leaflet (GeoJSON [Lon, Lat] -> Leaflet [Lat, Lon])
+                if (seg.geometry && seg.geometry.coordinates) {
+                    const latlngs = seg.geometry.coordinates.map(c => [c[1], c[0]]);
+                    L.polyline(latlngs, { color: color, weight: 6, opacity: 0.8 }).addTo(routeLayer);
+                }
+            });
+
+            const hospIcon = L.divIcon({
+                html: '<div style="font-size:35px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); z-index:1000">🏥</div>',
+                iconSize: [40, 40], className: ''
+            });
+            destMarker = L.marker([dest.lat, dest.lon], { icon: hospIcon, zIndexOffset: 1000 }).addTo(map);
+
+            // Update Info Card
+            document.getElementById('h-name').innerText = dest.name;
+            document.getElementById('h-score').innerText = data.score;
+            if (dest.opening_hours && dest.opening_hours !== 'None') {
+                document.getElementById('h-hours-row').style.display = 'flex';
+                document.getElementById('h-hours').innerText = dest.opening_hours;
+            } else {
+                document.getElementById('h-hours-row').style.display = 'none';
+            }
+
+            document.getElementById('results-card').style.display = 'block';
+
+            // Highlight selected in list
+            const items = document.getElementById('hosp-list').children;
+            for (let i = 0; i < items.length; i++) {
+                items[i].style.borderColor = (i === idx) ? 'var(--accent)' : '#edeff2';
+                items[i].style.background = (i === idx) ? '#f0fbf4' : 'white';
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+[
+    {
+        "question": "What are the common symptoms of preeclampsia during pregnancy?",
+        "ground_truth_context": "bad headaches, problems with vision (blurred vision, lights flashing), bad pain just below ribs, vomiting and sudden swelling of face, hands or feet.",
+        "ideal_answer": "Common symptoms of preeclampsia include severe headaches, vision problems such as blurring or flashing lights, intense pain below the ribs, vomiting, and sudden onset of edema in the face, hands, or feet.",
+        "category": "High Risk",
+        "critical_info": [
+            "hypertension",
+            "edema",
+            "vision changes"
+        ]
+    },
+    {
+        "question": "Is it safe to consume caffeine while pregnant?",
+        "ground_truth_context": "Daily caffeine intake should be below 300mg (WHO) or 200mg (other guidelines). Higher intake increases risk of low birth weight.",
+        "ideal_answer": "Yes, but in moderation. It is recommended to keep caffeine intake below 200-300mg per day to avoid risks such as low birth weight.",
+        "category": "Nutrition",
+        "critical_info": [
+            "200mg-300mg limit"
+        ]
+    },
+    {
+        "question": "When should I contact my doctor immediately regarding fetal movement?",
+        "ground_truth_context": "REPORTING REDUCED FETAL MOVEMENTS. Get your maternity certificate... measure from top of uterus. Feeling baby move at each appointment from 24 weeks.",
+        "ideal_answer": "You should contact your doctor immediately if you notice a significant decrease or cessation in your baby's movements, especially after the 24th week.",
+        "category": "Emergency",
+        "critical_info": [
+            "immediate contact",
+            "reduced movement"
+        ]
+    }
+]

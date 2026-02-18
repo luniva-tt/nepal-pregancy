@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .prediction-form-card {
+        border-left: 5px solid var(--primary);
+    }
+
+    .metric-bubble {
+        background: var(--bg-light);
+        padding: 1rem;
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid var(--secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold"><span style="color: var(--primary);">Hello,</span> {{ current_user.full_name }}!</h2>
+        <p class="text-secondary">Welcome to your pregnancy care dashboard.</p>
+    </div>
+</div>
+
+{% if records %}
+<!-- Quick Stats Row -->
+<div class="row g-3 mb-5">
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary">Age</span>
+            <span class="fw-bold fs-5">{{ records[0].age }} yrs</span>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary">Gest. Week</span>
+            <span class="fw-bold fs-5">{{ records[0].gestational_age_weeks }}</span>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary">Weight</span>
+            <span class="fw-bold fs-5">{{ "%.1f"|format(records[0].weight_kg) if records[0].weight_kg else '--' }}
+                kg</span>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary">Blood Pressure</span>
+            <span class="fw-bold fs-5">{{ records[0].systolic_bp }}/{{ records[0].diastolic_bp }}</span>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary">BMI</span>
+            <span class="fw-bold fs-5">{{ "%.1f"|format(records[0].bmi) if records[0].bmi else '--' }}</span>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="metric-bubble">
+            <span class="d-block small text-secondary text-primary">Latest Risk</span>
+            <span
+                class="fw-bold fs-5 risk-text-{{ records[0].risk_level.lower().replace(' ', '-') if records[0].risk_level else 'unknown' }}">{{
+                records[0].risk_level or 'N/A' }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="glass-card p-4 prediction-form-card">
+            <h4 class="fw-bold mb-4"><i class="fas fa-vial me-2 text-primary"></i> New Risk Screening</h4>
+            {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+            <form action="{{ url_for('predict') }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Age</label>
+                        <input type="number" name="age" class="form-control" value="25" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Gest. Week</label>
+                        <input type="text" name="gestational_age_weeks" class="form-control" value="30 week" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight_kg" class="form-control" value="60" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Height (feet.inch)</label>
+                        <input type="text" name="height_cm" class="form-control" value="5.3" required
+                            placeholder="e.g. 5.3">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Sys BP</label>
+                        <input type="number" name="systolic_bp" class="form-control" value="120" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Dia BP</label>
+                        <input type="number" name="diastolic_bp" class="form-control" value="80" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">FHR (bpm)</label>
+                        <input type="text" name="fetal_heart_rate" class="form-control" value="140" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Anemia</label>
+                        <select name="anemia" class="form-select">
+                            <option value="No" selected>No</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Higher">Higher</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <hr class="my-2">
+                    </div>
+                    <h6 class="fw-bold text-primary mb-2">Clinical Tests</h6>
+
+                    <!-- Categorical Row 3 -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Jaundice</label>
+                        <select name="jaundice" class="form-select">
+                            <option value="No" selected>No</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Higher">Higher</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Fetal Position</label>
+                        <select name="fetal_position" class="form-select">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Abnormal">Abnormal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Fetal Movement</label>
+                        <select name="fetal_movement" class="form-select">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Abnormal">Abnormal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Urine Albumin</label>
+                        <select name="urine_albumin" class="form-select">
+                            <option value="No" selected>No</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Higher">Higher</option>
+                        </select>
+                    </div>
+
+                    <!-- Categorical Row 4 -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Urine Sugar</label>
+                        <select name="urine_sugar" class="form-select">
+                            <option value="No" selected>No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">VDRL Test</label>
+                        <select name="vdrl_test" class="form-select">
+                            <option value="Negative" selected>Negative</option>
+                            <option value="Positive">Positive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">HbsAg Test</label>
+                        <select name="hbsag_test" class="form-select">
+                            <option value="Negative" selected>Negative</option>
+                            <option value="Positive">Positive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Prev. Pregnancies</label>
+                        <select name="previous_pregnancies" class="form-select">
+                            <option value="1st" selected>1st</option>
+                            <option value="2nd">2nd</option>
+                            <option value="3rd">3rd</option>
+                        </select>
+                    </div>
+
+                    <!-- Categorical Row 5 -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">TT Vaccine</label>
+                        <select name="tt_vaccine" class="form-select">
+                            <option value="1st" selected>1st</option>
+                            <option value="2nd">2nd</option>
+                            <option value="3rd">3rd</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label small fw-bold">Additional Notes/Symptoms</label>
+                        <input type="text" name="symptoms" class="form-control" placeholder="Optional notes...">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom mt-4 py-2 w-100">
+                        <i class="fas fa-robot me-2"></i> Generate AI Risk Assessment & Hospital Recommendations
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        {% if result %}
+        <div class="glass-card p-4 mb-4 border-start border-5 border-primary">
+            <h5 class="fw-bold mb-3">Latest Result</h5>
+            <div class="text-center py-4">
+                <h2 class="risk-text-{{ result.lower().replace(' ', '-') if result else 'unknown' }}">
+                    {{ result or 'No Records' }}
+                </h2>
+                <p class="small text-secondary mb-0">Based on our clinical data analysis.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3">Summary Stats</h5>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="metric-bubble">
+                        <span class="d-block small text-secondary">Age</span>
+                        <span class="fw-bold">{{ records[0].age if records else '-' }}</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="metric-bubble">
+                        <span class="d-block small text-secondary">Gest. Week</span>
+                        <span class="fw-bold">{{ records[0].gestational_age_weeks if records else '-' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-4 mt-4 text-center">
+            <h5 class="fw-bold mb-3"><i class="fas fa-brain me-2 text-primary"></i> AI Insights</h5>
+            <div class="p-3 bg-light rounded">
+                <i class="fas fa-chart-line fa-3x text-secondary opacity-50"></i>
+                <p class="small text-secondary mt-2">Historical trends will appear once enough data is collected.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-lg-12">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-chart-line me-2 text-primary"></i> Health Trends</h5>
+            <canvas id="healthTrendChart" height="100"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-history me-2 text-primary"></i> Historical Health Records</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Week</th>
+                            <th>Weight</th>
+                            <th>BP</th>
+                            <th>FHR</th>
+                            <th>Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if records %}
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.prediction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ record.gestational_age_weeks }}</td>
+                            <td>{{ record.weight_kg }} kg</td>
+                            <td>{{ record.systolic_bp }}/{{ record.diastolic_bp }}</td>
+                            <td>{{ record.fetal_heart_rate }}</td>
+                            <td>
+                                <span
+                                    class="badge rounded-pill badge-risk-{{ record.risk_level.lower().replace(' ', '-') if record.risk_level else 'unknown' }}">
+                                    {{ record.risk_level or 'N/A' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-secondary py-4">No records found yet.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('healthTrendChart').getContext('2d');
+
+    const labels = [
+        {% for record in records | reverse %}
+    "{{ record.prediction_date.strftime('%b %d') }}",
+        {% endfor %}
+    ];
+
+    const riskData = [
+        {% for record in records | reverse %}
+    { { 3 if record.risk_level == 'Risk' else 1 if record.risk_level else 0 } },
+    {% endfor %}
+    ];
+
+    const weightData = [
+        {% for record in records | reverse %}
+    { { record.weight_kg if record.weight_kg else 0 } },
+    {% endfor %}
+    ];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Risk Level (1=Normal, 3=At Risk)',
+                data: riskData,
+                borderColor: '#4361ee',
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                tension: 0.4,
+                fill: true,
+                yAxisID: 'y',
+            }, {
+                label: 'Weight (kg)',
+                data: weightData,
+                borderColor: '#4cc9f0',
+                tension: 0.4,
+                fill: false,
+                yAxisID: 'y1',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { type: 'linear', display: true, position: 'left', min: 0, max: 4 },
+                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

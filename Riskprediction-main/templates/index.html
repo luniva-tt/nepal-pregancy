@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row align-items-center min-vh-100">
+    <div class="col-lg-6">
+        <h1 class="display-3 fw-bold mb-4" style="color: var(--primary);">Nurturing Life, <br>Empowering Mothers</h1>
+        <p class="lead mb-5 text-secondary">Advanced risk prediction and maternal health monitoring powered by AI. Made
+            for
+            Nepal, by the future of healthcare technology.</p>
+        <div class="d-flex gap-3">
+            {% if not current_user %}
+            <a href="{{ url_for('signup') }}" class="btn btn-primary-custom px-5 py-3 fs-5">Get Started <i
+                    class="fas fa-arrow-right ms-2"></i></a>
+            {% else %}
+            {% if current_user.role == 'doctor' %}
+            <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-primary-custom px-5 py-3 fs-5">Go to Dashboard <i
+                    class="fas fa-arrow-right ms-2"></i></a>
+            {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary-custom px-5 py-3 fs-5">Go to Dashboard <i
+                    class="fas fa-arrow-right ms-2"></i></a>
+            {% endif %}
+            {% endif %}
+            <a href="{{ url_for('about') }}" class="btn btn-outline-secondary rounded-pill px-5 py-3 fs-5">Learn
+                More</a>
+        </div>
+
+        <div class="mt-5 d-flex align-items-center gap-4">
+            <div class="stat-item">
+                <h3 class="fw-bold mb-0">99.9%</h3>
+                <small class="text-secondary">AI Accuracy</small>
+            </div>
+            <div class="vr text-secondary" style="height: 30px;"></div>
+            <div class="stat-item">
+                <h3 class="fw-bold mb-0">50k+</h3>
+                <small class="text-secondary">Data Points</small>
+            </div>
+            <div class="vr text-secondary" style="height: 30px;"></div>
+            <div class="stat-item">
+                <h3 class="fw-bold mb-0">Role-Based</h3>
+                <small class="text-secondary">Support</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 text-center">
+        <!-- Using a placeholder for now, will replace with an image if possible -->
+        <div class="glass-card p-5 mt-5 mt-lg-0">
+            <i class="fa-solid fa-heart-pulse fa-10x" style="color: var(--primary); opacity: 0.8;"></i>
+            <div class="mt-4">
+                <h4 class="fw-bold">Intelligent Risk Screening</h4>
+                <p class="text-secondary">Enter your health metrics to get an instant AI-powered risk assessment.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 py-5 g-4">
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="icon-circle mb-3 mx-auto"
+                style="width: 60px; height: 60px; background: var(--bg-light); border-radius: 50%; display: grid; place-items: center;">
+                <i class="fas fa-microscope text-primary fs-4"></i>
+            </div>
+            <h5 class="fw-bold">Ensemble Learning</h5>
+            <p class="small text-secondary">Our model uses Random Forest, XGBoost, and SVC for the most reliable
+                maternal
+                health predictions.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="icon-circle mb-3 mx-auto"
+                style="width: 60px; height: 60px; background: var(--bg-light); border-radius: 50%; display: grid; place-items: center;">
+                <i class="fas fa-shield-heart text-primary fs-4"></i>
+            </div>
+            <h5 class="fw-bold">Secure Data</h5>
+            <p class="small text-secondary">Your privacy is our priority. All health records are encrypted and stored
+                securely.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100 text-center">
+            <div class="icon-circle mb-3 mx-auto"
+                style="width: 60px; height: 60px; background: var(--bg-light); border-radius: 50%; display: grid; place-items: center;">
+                <i class="fas fa-hospital-user text-primary fs-4"></i>
+            </div>
+            <h5 class="fw-bold">Doctor Support</h5>
+            <p class="small text-secondary">Role-based dashboards for both mothers and doctors to ensure
+                collaborative care.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

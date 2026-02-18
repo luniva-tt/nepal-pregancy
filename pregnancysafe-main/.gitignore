@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.pickle
+*.h5
+*.db
+dataset/*.geojson
+dataset/*.csv
+# Ignore dataset files
+dataset/*.geojson
+dataset/*.csv
+dataset/*.zip
+dataset/*.gpkg

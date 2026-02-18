@@ -1,0 +1,17 @@
+[
+  {
+    "question": "What are the common symptoms of preeclampsia during pregnancy?",
+    "expected_answer": "Preeclampsia symptoms typically include high blood pressure (hypertension), protein in urine (proteinuria), swelling in hands and face, severe headaches, and vision changes.",
+    "category": "High Risk"
+  },
+  {
+    "question": "Is it safe to consume caffeine while pregnant?",
+    "expected_answer": "Moderate caffeine consumption (less than 200mg per day) is generally considered safe during pregnancy.",
+    "category": "Nutrition"
+  },
+  {
+    "question": "When should I contact my doctor immediately regarding fetal movement?",
+    "expected_answer": "Contact your doctor immediately if you notice a significant decrease or cessation in fetal movement (kick counts).",
+    "category": "Emergency"
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "question": "What are the common symptoms of preeclampsia during pregnancy?",
+    "category": "High Risk",
+    "latency": 7.487549066543579,
+    "num_sources": 3,
+    "answer_length": 381,
+    "sources": [
+      "severe than the \u2018baby blues\u2019 (see page 178). Postnatal depression affects one in 10 women and \ncan be serious if left untreated. See page 82 for more information. \nPre-eclampsia A condition that only ",
+      "of pre-eclampsia.\nThe symptoms\nSome of the symptoms  \nof pre-eclampsia are:\n\u2022 bad headaches\n\u2022 problems with vision, such as \nblurred vision or lights \ufb02ashing \nbefore the eyes\n\u2022 bad pain just below the",
+      "management of pregnancy-related complications, particularly pre-eclampsia  \u2022 Recognition and treatment of underlying or concurrent illness"
+    ]
+  },
+  {
+    "question": "Is it safe to consume caffeine while pregnant?",
+    "category": "Nutrition",
+    "latency": 8.41074514389038,
+    "num_sources": 3,
+    "answer_length": 335,
+    "sources": [
+      "doi:10.1186/ s12916-014-0174-6.\n78. Rhee J, Kim R, Kim Y , T am M, Lai Y , Keum N, \nOldenburg CE. Maternal caffeine consumption \nduring pregnancy and risk of low birth weight: a \ndose-response meta-an",
+      "Chapter 3. Evidence and recommendations \n39\nFetal and neonatal outcomes: stillbirths\nThe reviews reported \u201cpregnancy loss\u201d, a composite \noutcome comprising stillbirths and miscarriages. \nModerate-cert",
+      "Not recommended\nRestricting caffeine \nintake\nA.10: For pregnant women with high daily caffeine intake (more than \n300\u00a0mg per day),k lowering daily caffeine intake during pregnancy is \nrecommended to r"
+    ]
+  },
+  {
+    "question": "When should I contact my doctor immediately regarding fetal movement?",
+    "category": "Emergency",
+    "latency": 5.949672698974609,
+    "num_sources": 3,
+    "answer_length": 141,
+    "sources": [
+      "antenatal education (see \nAntenatal education on \npage 56).\n\u2022 You will begin to feel your \nbaby move.\n\u2022 Get your maternity \ncerti\ufb01cate (form MAT \nB1) from your doctor or \nmidwife (see Rights and \nbene",
+      "aware of the importance of fetal movements in the third trimester and of reporting reduced fetal \nmovements. \n\u2022 Clinical enquiry by ANC providers at each ANC visit about maternal perception of fetal m",
+      "development and  \nwell-being\nAt each antenatal appointment \nfrom 24 weeks, your midwife or \ndoctor should check your baby\u2019s \ngrowth. To do this, they will \nmeasure the distance from the top \nof your u"
+    ]
+  }
+]

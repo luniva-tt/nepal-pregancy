@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="glass-card p-5 mt-5">
+            <h2 class="fw-bold text-center mb-4" style="color: var(--primary);">Welcome Back</h2>
+            <p class="text-center text-secondary mb-5">Login to access your personalized medical dashboard.</p>
+
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('login_post') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Username</label>
+                    <input type="text" name="username" class="form-control" required placeholder="Enter your username">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Password</label>
+                    <div class="password-container">
+                        <input type="password" name="password" class="form-control" required maxlength="72"
+                            placeholder="••••••••">
+                        <i class="fas fa-eye password-toggle"></i>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100 py-2">Login</button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <p class="small text-secondary">New here? <a href="{{ url_for('signup') }}"
+                        class="text-primary fw-bold">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

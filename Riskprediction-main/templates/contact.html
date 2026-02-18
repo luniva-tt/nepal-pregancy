@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="glass-card p-5 mt-5">
+    <h1 class="fw-bold mb-4" style="color: var(--primary);">Contact Us</h1>
+    <p class="lead text-secondary">We'd love to hear from you. Reach out for any questions or feedback.</p>
+
+    <div class="row mt-5 g-4">
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-envelope fa-2x mb-3" style="color: var(--primary);"></i>
+                <h6 class="fw-bold">Email</h6>
+                <p class="small text-secondary">support@mamucare.com.np</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-phone fa-2x mb-3" style="color: var(--primary);"></i>
+                <h6 class="fw-bold">Phone</h6>
+                <p class="small text-secondary">+977-01-4000000</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-map-marker-alt fa-2x mb-3" style="color: var(--primary);"></i>
+                <h6 class="fw-bold">Address</h6>
+                <p class="small text-secondary">Kathmandu University, Dhulikhel, Nepal</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-8 mx-auto">
+            <form class="glass-card p-4">
+                <h5 class="fw-bold mb-3">Send Message</h5>
+                <div class="mb-3">
+                    <input type="text" class="form-control" placeholder="Your Name">
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Your Email">
+                </div>
+                <div class="mb-3">
+                    <textarea class="form-control" rows="4" placeholder="Your Message"></textarea>
+                </div>
+                <button type="button" class="btn btn-primary-custom w-100">Send Inquiry</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

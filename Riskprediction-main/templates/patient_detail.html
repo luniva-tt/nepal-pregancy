@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .metric-bubble {
+        background: var(--bg-light);
+        padding: 1rem;
+        border-radius: 15px;
+        text-align: center;
+        border: 1px solid var(--secondary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-outline-secondary rounded-pill mb-3">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+        <h2 class="fw-bold">
+            <i class="fas fa-user-circle me-2" style="color: var(--primary);"></i>
+            {{ patient.full_name or patient.username }}
+        </h2>
+        <p class="text-secondary">Patient ID: #{{ patient.id }} &bull; Email: {{ patient.email }}</p>
+    </div>
+</div>
+
+<!-- Patient Vitals Overview -->
+<div class="row g-4 mb-4">
+    {% if records %}
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">Age</span>
+            <span class="fw-bold fs-5">{{ records[0].age }}</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">Week</span>
+            <span class="fw-bold fs-5">{{ records[0].gestational_age_weeks }}</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">Weight</span>
+            <span class="fw-bold fs-5">{{ "%.1f"|format(records[0].weight_kg) }} kg</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">BP</span>
+            <span class="fw-bold fs-5">{{ records[0].systolic_bp }}/{{ records[0].diastolic_bp }}</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">BMI</span>
+            <span class="fw-bold fs-5">{{ "%.1f"|format(records[0].bmi) if records[0].bmi else '-' }}</span>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="glass-card p-3 text-center">
+            <span class="d-block small text-secondary">Latest Risk</span>
+            <span
+                class="fw-bold fs-5 risk-text-{{ records[0].risk_level.lower().replace(' ', '-') if records[0].risk_level else 'unknown' }}">{{
+                records[0].risk_level or 'N/A' }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="glass-card p-4 text-center">
+            <p class="text-secondary mb-0">This patient has no health records yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if records %}
+<!-- Health Trends Chart -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-chart-line me-2" style="color: var(--primary);"></i> Health Trends
+            </h5>
+            <canvas id="patientTrendChart" height="100"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Full History Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-4"><i class="fas fa-history me-2" style="color: var(--primary);"></i> Complete Health
+                History</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Age</th>
+                            <th>Week</th>
+                            <th>Weight</th>
+                            <th>BP</th>
+                            <th>BMI</th>
+                            <th>FHR</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.prediction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ record.age }}</td>
+                            <td>{{ record.gestational_age_weeks }}</td>
+                            <td>{{ record.weight_kg }} kg</td>
+                            <td>{{ record.systolic_bp }}/{{ record.diastolic_bp }}</td>
+                            <td>{{ "%.1f"|format(record.bmi) if record.bmi else '-' }}</td>
+                            <td>{{ record.fetal_heart_rate }}</td>
+                            <td><span
+                                    class="badge rounded-pill badge-risk-{{ record.risk_level.lower().replace(' ', '-') if record.risk_level else 'unknown' }}">{{
+                                    record.risk_level or 'N/A' }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if records %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('patientTrendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for record in records | reverse %}
+                    "{{ record.prediction_date.strftime('%b %d') }}",
+                {% endfor %}
+            ],
+        datasets: [{
+            label: 'Risk Level (1=Normal, 3=At Risk)',
+            data: [
+                {% for record in records | reverse %}
+                        {{ 3 if record.risk_level == 'Risk' else 1 if record.risk_level else 0 }},
+        {% endfor %}
+    ],
+        borderColor: '#4361ee',
+        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y',
+            }, {
+            label: 'Weight (kg)',
+            data: [
+                {% for record in records | reverse %}
+                        {{ record.weight_kg if record.weight_kg else 0 }},
+        {% endfor %}
+                ],
+        borderColor: '#4cc9f0',
+        tension: 0.4,
+        fill: false,
+        yAxisID: 'y1',
+            }]
+        },
+        options: {
+        responsive: true,
+        scales: {
+            y: { type: 'linear', display: true, position: 'left', min: 0, max: 4 },
+            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false } }
+        }
+    }
+    });
+</script>
+{% endif %}
+{% endblock %}
